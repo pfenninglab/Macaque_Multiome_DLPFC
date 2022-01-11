@@ -1,0 +1,40 @@
+Rplots.pdf
+
+# big files
+*.gtf
+*.gz
+*.tracking
+
+# LDSC extensions
+*.log
+*.M_5_50
+*.M
+
+*.bam
+*.bai
+*.arrow
+*.rds
+*.h5
+*.mtx
+*.rda
+
+*/BAM/*
+*/SNAP/*
+*/FASTQ/*
+*/bam/*
+*/fastq/*
+*/snap/*
+*/outs/*
+*/logs/*
+*/ArchR*
+*/meme/*
+*/data/*
+
+# log file extensions
+*.log
+*.txt
+*.ipynb_checkpoints
+m015_Peanut_snATAC/data/raw_data/peak_rheMac10/Stauffer_striatum_merged_peaks.bgd
+m015_Peanut_snATAC/data/raw_data/peak_rheMac10/Stauffer_striatum_merged_peaks.bgd.fasta
+*.ldcts
+
