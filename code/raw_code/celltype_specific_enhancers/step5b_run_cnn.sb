@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=gpu
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks=1               # total number of tasks across all nodes
+#SBATCH --cpus-per-task=1        # cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=16G                 # total memory per node (4 GB per cpu-core is default)
+#SBATCH --gres=gpu:1             # number of gpus per node
+#SBATCH --job-name cnn_dlpfc
+#SBATCH --error=logs/cnn_dlpfc-%J.err.txt
+#SBATCH --output=logs/cnn_dlpfc-%J.out.txt
+
+ENH=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC/data/tidy_data/celltype_specific_enhancers/fasta/ 
+NAME="${1}_b64e30.h5"
+PT="rheMac10_${1}_fold1_train_positive.fa"
+NT="rheMac10_${1}_fold1_train_negative.fa"
+PV="rheMac10_${1}_fold1_valid_positive.fa"
+NV="rheMac10_${1}_fold1_valid_negative.fa"
+
+python step5c_keras_cnn.py -b 64 -e 30 -n ${NAME} -pt ${ENH}${PT} -nt ${ENH}${NT} -pv ${ENH}${PV} -nv ${ENH}${NV}

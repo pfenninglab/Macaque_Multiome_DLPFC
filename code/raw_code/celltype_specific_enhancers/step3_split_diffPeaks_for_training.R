@@ -26,7 +26,7 @@ if(!file.exists(peak_enh_fn)){
   PROJDIR=here("data/tidy_data/ArchRProjects/ArchR_DLPFC_scATAC")
   proj = loadArchRProject(path = PROJDIR)
   peak_gr = getPeakSet(proj)
-  indKeep = which(peak_gr$peakType %in% c('Distal', 'Intron') & abs(peak_gr$distToTSS) > 2000)
+  indKeep = which(peak_gr$peakType %in% c('Distal', 'Intronic') & abs(peak_gr$distToTSS) > 2000)
   peak_gr = peak_gr[indKeep]
   peak_gr = peak_gr %>% addSummitCenter() %>% nameNarrowPeakRanges(genome = GENOME)
   writeGRangesToFasta (gr = peak_gr, file = peak_enh_fn, genome = GENOME)
@@ -71,13 +71,13 @@ for(cell in names(rhesus_peakList)){
   for(fold in names(folds)){
     # write the positives
     pos.fasta_fn = here(DATADIR, 'fasta', 
-                             paste(GENOME, cell, fold, split, 'positive.fa.gz', sep = '_'))
+                             paste(GENOME, cell, fold, split, 'positive.fa', sep = '_'))
     posFasta = mapply(writeGRangesToFasta, gr = rhesus_posList_split[[fold]][[cell]],  
                       file = pos.fasta_fn, genome = GENOME)
     
     # write the negatives
     neg.fasta_fn = here(DATADIR, 'fasta', 
-                        paste(GENOME, cell, fold, split, 'negative.fa.gz', sep = '_'))
+                        paste(GENOME, cell, fold, split, 'negative.fa', sep = '_'))
     negFasta = mapply(writeGRangesToFasta, gr = rhesus_negList_split[[fold]][[cell]],  
                       file = neg.fasta_fn, genome = GENOME)
 }}

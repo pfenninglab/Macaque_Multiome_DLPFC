@@ -89,7 +89,12 @@ def predict_sequences(model_name, x, ids):
     # predict labels
     # combineStrands will average the logit of the for and rev DNA strands
     model = load_model(model_name, compile=False)
-    y_pred_score = model.predict(x, verbose = args.verbose).flatten()
+    # get first conv layer expected shape 
+    input_shape = model.get_config()["layers"][0]["config"]["batch_input_shape"][1:]
+    if (input_shape==x.shape[1:]):
+        y_pred_score = model.predict(x, verbose = args.verbose).flatten()
+    else:
+        y_pred_score = model.predict(np.expand_dims(x, axis=3), verbose = args.verbose).flatten()
     y_pred_score = np.nan_to_num(y_pred_score)
     df = pd.DataFrame({'id': ids, 'y_pred_logit': np.log10(y_pred_score) - np.log10(1-y_pred_score)})
     df = df.groupby(['id']).mean()
@@ -99,13 +104,16 @@ def predict_sequences(model_name, x, ids):
 
 
 
-
 def predict_sequences2(model_name, x, y, ids):
     # Creating an empty Dataframe with column names only
     # predict labels
     # combineStrands will average the logit of the for and rev DNA strands
     model = load_model(model_name, compile=False)
-    y_pred_score = model.predict(x, verbose = args.verbose).flatten()
+    input_shape = model.get_config()["layers"][0]["config"]["batch_input_shape"][1:]
+    if (input_shape==x.shape[1:]):
+        y_pred_score = model.predict(x, verbose = args.verbose).flatten()
+    else:
+        y_pred_score = model.predict(np.expand_dims(x, axis=3), verbose = args.verbose).flatten()
     y_pred_score = np.nan_to_num(y_pred_score)
     df = pd.DataFrame({'id': ids, 'y' : y, 'y_pred_logit': np.log10(y_pred_score) - np.log10(1-y_pred_score)})
     df = df.groupby(['id']).mean()
@@ -299,6 +307,8 @@ if __name__ == '__main__':
     parser.add_argument("--out_dir", type=str, default = '.', help="path to ouputput directory, default is pwd")
 
     ### parse arguments
+    args = parser.parse_args()
+
     # args = parser.parse_args(['--out_dir=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog', 
     #     '--cyclical_momentum', '--label=MSN_D1_hgRmMm_enhVsNonEnhOrth', 
     #     '--train_fasta_pos=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_D1_trainPos.fa', 
@@ -306,34 +316,44 @@ if __name__ == '__main__':
     #     '--valid_fasta_pos=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_D1_validPos.fa', 
     #     '--valid_fasta_neg=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_D1_validNeg.fa'])
 
-    # args = parser.parse_args(['--mode=evaluate', '--model_name=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/models/MSN_SN_fold5_hgRmMm_nonEnhOrth/MSN_SN_fold5_hgRmMm_nonEnhOrth_OCP_NB1000_NE23_BR0.01_MR0.1_BM0.85_MM0.99_DO0.1.h5', 
-    # '--train_fasta_pos=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_SN_fold5_hgRmMm_nonEnhOrth_nonEnhOrth_trainPos.fa', 
-    # '--train_fasta_neg=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_SN_fold5_hgRmMm_nonEnhOrth_nonEnhOrth_trainNeg.fa', 
-    # '--valid_fasta_pos=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_SN_fold5_hgRmMm_nonEnhOrth_nonEnhOrth_validPos.fa', 
-    # '--valid_fasta_neg=/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/data/raw_data/cnn_enhancer_ortholog/fasta/MSN_SN_fold5_hgRmMm_nonEnhOrth_nonEnhOrth_validNeg.fa'])
+    # args = parser.parse_args(['--mode=evaluate', 
+    # '--model_name=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC/data/tidy_data/celltype_specific_enhancers/models_cnn/VIPvsGLIA/VIPvsGLIA_b64e30.h5', 
+    # '--out_dir=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC/data/tidy_data/celltype_specific_enhancers/predictions/VIPvsGLIA', 
+    # '--prefix=VIPvsGLIA', '--conv_width=11', '--l2_reg=1e-5', '--dropout=0.1', '--batch_size=32',
+    # '--epochs=30', '--numCycles=2.5', '--base_lr=1e-5', '--max_lr=0.1',
+    # '--base_m=0.875', '--max_m=0.99', '--verbose=1', '--cyclical_momentum',
+    # '--valid_fasta_pos=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC/data/tidy_data/celltype_specific_enhancers/fasta/rheMac10_VIPvsGLIA_fold1_valid_positive.fa', 
+    # '--valid_fasta_neg=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC/data/tidy_data/celltype_specific_enhancers/fasta/rheMac10_VIPvsGLIA_fold1_valid_negative.fa'])
 
-    args = parser.parse_args()
     if args.model_name is None:
         label = f'{args.prefix}_OCP_NB{args.batch_size}_NE{args.epochs}_BR{args.base_lr}_MR{args.max_lr}_BM{args.base_m}_MM{args.max_m}_DO{args.dropout}'
         args.model_name = f"{args.out_dir}/models/{args.prefix}/{label}.h5"
-    else:
-        # parse the model name to get the OCP parameters
-        label = os.path.splitext(os.path.basename(args.model_name))[0]
+
+    # parse the model name to get the OCP parameters
+    label = os.path.splitext(os.path.basename(args.model_name))[0]
+    if args.prefix is None:
         args.prefix     = label.split('_OCP')[0]
+
+    if args.batch_size is None:
         args.batch_size = int(label.split('_NB')[1].split('_')[0])
+
+    if args.epochs is None:
         args.epochs     = int(label.split('_NE')[1].split('_')[0])
+
+    if args.base_lr is None:
         args.base_lr    = float(label.split('_BR')[1].split('_')[0])
+
+    if args.max_lr is None:
         args.max_lr     = float(label.split('_MR')[1].split('_')[0])
+
+    if args.base_m is None:
         args.base_m     = float(label.split('_BM')[1].split('_')[0])
+
+    if args.max_m is None:
         args.max_m      = float(label.split('_MM')[1].split('_')[0])
+
+    if args.dropout is None:
         args.dropout    = float(label.split('_DO')[1].split('_')[0])
 
     main(args)
-
-
-
-
-
-
-
 

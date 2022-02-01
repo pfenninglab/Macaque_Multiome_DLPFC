@@ -1,0 +1,40 @@
+#!/bin/bash
+#SBATCH --partition=pfen3
+#SBATCH --nodes=1                # node count
+#SBATCH --ntasks=1               # total number of tasks across all nodes
+#SBATCH --cpus-per-task=1        # cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=89G                # total memory per node (4 GB per cpu-core is default)
+#SBATCH --gres=gpu:1             # number of gpus per node
+#SBATCH --job-name pred_cnn_dlpfc
+#SBATCH --error=logs/pred_cnn_dlpfc_%A_%a.txt
+#SBATCH --output=logs/pred_cnn_dlpfc_%A_%a.txt
+#SBATCH --array=32-94
+
+source activate tf2
+PROJDIR=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC
+DATADIR=${PROJDIR}/data/tidy_data/celltype_specific_enhancers
+cd $PROJDIR/code/raw_code/celltype_specific_enhancers
+
+## get Chai's models and predict on validation set
+MODEL_NAME=$(ls ${PROJDIR}/data/tidy_data/celltype_specific_enhancers/models_cnn/*/*_b64e30.h5 | awk -v IND="${SLURM_ARRAY_TASK_ID}" 'NR==IND {print $1}' )
+PREFIX=$(basename $MODEL_NAME _b64e30.h5 )
+CELLTYPE=$(basename $MODEL_NAME | awk 'BEGIN { FS = "vs" }; {print $1}' )
+PV="rheMac10_${PREFIX}_fold1_valid_positive.fa"
+NV="rheMac10_${PREFIX}_fold1_valid_negative.fa"
+CE="rheMac10_DLPFC.noncoding_peak.fa"
+
+# evaluate species specificity
+python train_singleTask_CNN_classifier_OCP.py --mode 'evaluate' \
+--conv_width 11 --l2_reg 1e-5 --dropout 0.1 --batch_size 2000 \
+--epochs 30 --numCycles 2.5 --base_lr 1e-5 --max_lr 0.1 \
+--base_m 0.875 --max_m 0.99 --verbose 2 --cyclical_momentum \
+--out_dir $DATADIR --prefix ${CELLTYPE} --model_name $MODEL_NAME \
+--predict_out ${PREFIX}.cnn_valid_eval \
+--valid_fasta_pos ${DATADIR}/fasta/$PV --valid_fasta_neg ${DATADIR}/fasta/$NV
+
+python train_singleTask_CNN_classifier_OCP.py --mode 'predict' \
+--conv_width 11 --l2_reg 1e-5 --dropout 0.1 --batch_size 1000 \
+--epochs 30 --numCycles 2.5 --base_lr 1e-5 --max_lr 0.1 \
+--base_m 0.875 --max_m 0.99 --verbose 2 --cyclical_momentum \
+--out_dir $DATADIR --prefix ${CELLTYPE} --model_name $MODEL_NAME --verbose 2 \
+--predict_out ${PREFIX}.CNNpred.noncoding_peak --predict_fasta ${DATADIR}/fasta/$CE

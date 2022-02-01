@@ -87,14 +87,14 @@ saveRDS(tree_dat, save_tree_fn)
 
 groupings = c(cell_class, cell_class2)
 df = cbind(do.call("rbind", replicate(6, as_tibble(tree_dat) , simplify = FALSE)),
-           data.frame(bgd1 = rep(names(cell_class), each = nrow(tree_dat)))) %>%
+           data.frame(bgd1 = rep(names(cell_class), each = nrow(as_tibble(tree_dat))))) %>%
   mutate(tmp = cell_class %>% as.character() %>% ss('\\.'),
          tmp2 = bgd1 %>% ss('\\.')) %>%
   filter(!is.na(label), tmp == tmp2, tmp2 != 'GLIA') %>% dplyr::select(-c(tmp, tmp2))
   
-cell_type_df= cbind(do.call("rbind", replicate(3, df, simplify = FALSE)),
-        data.frame(bgd2 = rep(c('EXC', 'INH', 'GLIA'), each = nrow(df)))) %>%
-  filter(bgd1 != bgd2) %>%  select(label, starts_with('bgd')) %>%
+cell_type_df= cbind(do.call("rbind", replicate(length(cell_class2), df, simplify = FALSE)),
+        data.frame(bgd2 = rep(names(cell_class2), each = nrow(df)))) %>%
+  select(label, starts_with('bgd')) %>%
   pivot_longer(-label, values_to = 'bgd.group') %>%
   mutate(bgd.labels = map2_chr(bgd.group, label, function(bgd.group, label){
     tmp = groupings[bgd.group] %>% unlist() %>% sort()
@@ -102,12 +102,10 @@ cell_type_df= cbind(do.call("rbind", replicate(3, df, simplify = FALSE)),
     tmp = paste(unlist(tmp), collapse = ';')
     return(tmp)})) %>%
   arrange(label, name, bgd.group) %>% dplyr::select(-name)%>%
-  filter(!duplicated(.)) %>%
+  filter(!duplicated(paste0(label,bgd.labels))) %>%
   mutate(model = paste0(label, 'vs', bgd.group)) %>%
   relocate(model, .before = everything())
 
 save_model_fn = here(DATADIR, 'rdas/cell_type_models_to_train_DLPFC.rds')
-save_model_fn2 = here(DATADIR, 'tables/cell_type_models_to_train_DLPFC.xlsx')
 saveRDS(cell_type_df, save_model_fn)
-cell_type_df %>% writexl::write_xlsx(save_model_fn2)
 
