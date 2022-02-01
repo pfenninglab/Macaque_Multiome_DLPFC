@@ -34,7 +34,7 @@ if [[ ! -f $NEGFILE ]]; then bedtools getfasta -name -fi ${GENOME} -bed ${BGDNAR
 
 ######################################
 # 4) make output dir and run meme-chip 
-OUTDIR=${PROJDIR}/meme/$(echo $NARROWPEAK | sed 's/.narrowPeak.gz/vsMergePeaks/g' )
+OUTDIR=${PROJDIR}/meme/$(basename $NARROWPEAK | sed 's/.narrowPeak.gz/vsMergePeaks/g' )
 mkdir -p $OUTDIR
 /home/ikaplow/anaconda2/bin/meme-chip \
 -fimo-skip -spamo-skip -noecho \
