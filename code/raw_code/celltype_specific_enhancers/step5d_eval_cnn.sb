@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --partition=pfen3
+#SBATCH --partition=pfen3,gpu
 #SBATCH --nodes=1                # node count
 #SBATCH --ntasks=1               # total number of tasks across all nodes
 #SBATCH --cpus-per-task=1        # cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=89G                # total memory per node (4 GB per cpu-core is default)
+#SBATCH --mem=45G                # total memory per node (4 GB per cpu-core is default)
 #SBATCH --gres=gpu:1             # number of gpus per node
 #SBATCH --job-name pred_cnn_dlpfc
 #SBATCH --error=logs/pred_cnn_dlpfc_%A_%a.txt
 #SBATCH --output=logs/pred_cnn_dlpfc_%A_%a.txt
-#SBATCH --array=32-94
+#SBATCH --array=1-94
 
 source activate tf2
 PROJDIR=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC
