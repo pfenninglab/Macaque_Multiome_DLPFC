@@ -134,6 +134,7 @@ proj <- addClusters(proj, reducedDims = 'HarmonyI_Combined', method = "Seurat",
 proj = addImputeWeights(proj, reducedDims = "LSI_Combined")
 proj = saveArchRProject(ArchRProj = proj)
 
+
 # add peak2gene links matrix
 proj <- addPeak2GeneLinks( ArchRProj = proj,dimsToUse = 1:30,
   reducedDims = "HarmonyI_Combined", useMatrix = 'GeneExpressionMatrix',
