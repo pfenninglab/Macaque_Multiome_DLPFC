@@ -8,7 +8,7 @@
 #SBATCH --job-name pred_cnn_dlpfc
 #SBATCH --error=logs/pred_cnn_dlpfc_%A_%a.txt
 #SBATCH --output=logs/pred_cnn_dlpfc_%A_%a.txt
-#SBATCH --array=1-94
+#SBATCH --array=1-280
 
 source activate tf2
 PROJDIR=/projects/pfenninggroup/singleCell/Macaque_Multiome_DLPFC
@@ -16,8 +16,8 @@ DATADIR=${PROJDIR}/data/tidy_data/celltype_specific_enhancers
 cd $PROJDIR/code/raw_code/celltype_specific_enhancers
 
 ## get Chai's models and predict on validation set
-MODEL_NAME=$(ls ${PROJDIR}/data/tidy_data/celltype_specific_enhancers/models_cnn/*/*_b64e30.h5 | awk -v IND="${SLURM_ARRAY_TASK_ID}" 'NR==IND {print $1}' )
-PREFIX=$(basename $MODEL_NAME _b64e30.h5 )
+MODEL_NAME=$(ls ${PROJDIR}/data/tidy_data/celltype_specific_enhancers/models_cnn/*/*.h5 | awk -v IND="${SLURM_ARRAY_TASK_ID}" 'NR==IND {print $1}' )
+PREFIX=$(basename $MODEL_NAME .h5 )
 CELLTYPE=$(basename $MODEL_NAME | awk 'BEGIN { FS = "vs" }; {print $1}' )
 PV="rheMac10_${PREFIX}_fold1_valid_positive.fa"
 NV="rheMac10_${PREFIX}_fold1_valid_negative.fa"

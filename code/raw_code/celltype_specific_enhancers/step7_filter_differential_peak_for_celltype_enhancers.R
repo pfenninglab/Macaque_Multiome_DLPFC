@@ -116,7 +116,7 @@ p2g_cor = setNames(p2g$Correlation, p2g$peak)
 
 ########################################
 ## 4) retrieve cell type unique motifs
-save_motif_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.noncoding_peak.HOCOMOCO11_celltypeUniqueMotifs.se.rds')
+save_motif_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.noncoding_peak.HOCOMOCO11_celltypeMotifs.se.rds')
 motif_unique_sums_se = readRDS(save_motif_fn)
 motif_unique_sums_se = motif_unique_sums_se[candidate_peaks, ]
 motif_counts = assays(motif_unique_sums_se)[[1]]
