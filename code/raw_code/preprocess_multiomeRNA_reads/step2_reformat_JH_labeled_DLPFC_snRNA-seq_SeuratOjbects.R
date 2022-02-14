@@ -54,7 +54,7 @@ SaveH5Seurat(obj_glia, file.path(DATADIR, 'glia_final.h5Seurat'), overwrite = TR
 
 #####################################################################
 ## 3) load SeuratObjects of labeled excitatory and inhibitory neurons
-obj_exc = readRDS(file.path(DATADIR, 'excita_2_final_updated.rds'))
+obj_exc = readRDS(file.path(DATADIR, 'excita_2_final_updated_final.rds'))
 obj_inh = readRDS(file.path(DATADIR, 'interneurons_1_updated.rds'))
 obj_neuron <- merge(obj_exc, y = obj_inh, add.cell.ids = c("EXC", "INH"), 
                     project = "DLPFC_snRNA")
