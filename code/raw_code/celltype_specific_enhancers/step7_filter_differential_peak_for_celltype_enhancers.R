@@ -18,12 +18,14 @@ save_models_fn = here(DATADIR, 'rdas/cell_type_models_to_train_DLPFC.rds')
 models_df = readRDS(save_models_fn)
 
 save_diffPeaks_fn = here(DATADIR, 'rdas/cell_type_models_diffPeakList_DLPFC.rds')
-diffPeakList = readRDS(save_diffPeaks_fn) %>% lapply(function(gr) gr[gr$Log2FC > 0])
+diffPeakList = readRDS(save_diffPeaks_fn) %>% lapply(function(gr) {
+  gr[gr$Log2FC > 0 & gr$FDR < 1e-2 & gr$MeanDiff > .05 ]
+})
 candidateList = lapply(diffPeakList, names)
 candidateList = split(candidateList[models_df$model], models_df$label)
 candidateList = lapply(candidateList, function(ll){
   ll = ll[lengths(ll) > 1000]
-  data.frame(peak = Reduce('intersect', ll))
+  data.frame(peak = Reduce('union', ll))
 })
 sapply(candidateList, nrow)
 
@@ -50,6 +52,11 @@ candidate_enh_pred_cnn_df = lapply(candidate_enh_pred_cnn_fn, fread) %>%
   dplyr::select(c('Name', 'y_pred_logit', 'model_name')) %>%
   dplyr::rename('score' = 'y_pred_logit', 'peak' = 'Name')
 
+## add the per-model ranks
+candidate_enh_pred_cnn_df = candidate_enh_pred_cnn_df %>% arrange(desc(score)) %>%
+  group_by(model_name) %>% mutate(rank = order(score, decreasing = T)) %>% ungroup()
+
+
 ## read in the predictions from the SVM
 candidate_enh_pred_svm_fn = list.files(pred_dir,full.names = T, recursive = T, 
                                        pattern = '_candidatesEnhancers.txt') %>% str_subset(grep_pat)
@@ -61,24 +68,34 @@ candidate_enh_pred_svm_df = lapply(candidate_enh_pred_svm_fn, fread, col.names =
     return(df[df$peak %in% candidateEnhancers$peak,])
   }) %>%  rbindlist(idcol = 'model_name')
 
+## add the per-model ranks
+candidate_enh_pred_svm_df = candidate_enh_pred_svm_df %>% arrange(desc(score)) %>%
+  group_by(model_name) %>% mutate(rank = order(score, decreasing = T)) %>% ungroup()
+
+
+## combine the models together, averaging scores
 candidate_enh_pred_df = bind_rows(candidate_enh_pred_cnn_df, candidate_enh_pred_svm_df) %>%
   full_join(x = eval_df, y = .) %>% inner_join(y = candidateEnhancers) %>% 
   as.data.table() %>% dplyr::select(-c(bgd.group:model_type))
 
 candidate_enh_pred_list = split(candidate_enh_pred_df, candidate_enh_pred_df$label)
 candidate_enh_pred_wide = lapply(candidate_enh_pred_list, pivot_wider, names_from = 'model', 
-              values_from = 'score', values_fn = gm) %>%
+              values_from = c('score', 'rank'), values_fn = mean) %>%
   lapply(function(df){
-    tmp = df %>% dplyr::select(-c('label', 'peak')) %>%
+    offTarget = df %>% dplyr::select(starts_with('score')) %>%
       apply(1,FUN =  function(x) any(x < 0))
-    tmp2 = df %>% dplyr::select(-c('label', 'peak')) %>%
-      apply(1,FUN =  gm)
-    df %>% mutate(SeqMLScore = tmp2, anyOffTarget = tmp) %>%
-      filter(SeqMLScore > 0) %>% arrange(anyOffTarget, desc(SeqMLScore)) %>%
-      relocate(SeqMLScore, .after = peak)
+    df = df[!offTarget, ]
+    avgScore = df %>% dplyr::select(starts_with('score')) %>%
+      apply(1,FUN =  mean)
+    avgRank = df %>% dplyr::select(starts_with('rank')) %>%
+      apply(1,FUN =  mean) %>% order()
+    df %>% mutate(AvgRank = avgRank, AvgScore = avgScore) %>%
+      filter(AvgScore > 0) %>% arrange(AvgRank) %>%
+      relocate(AvgRank, AvgScore, .after = peak) %>%
+      dplyr::select(-starts_with('rank'))
   })
-
 candidate_peaks = sapply(candidate_enh_pred_list, '[[', 'peak') %>% unlist()
+candidate_enh_pred_wide %>% sapply(nrow)
 
 
 ################################################
@@ -133,20 +150,18 @@ candidate_enh_list = lapply(candidate_enh_pred_wide, function(df){
              x[min(which(unlist(x) %in% names(markerGenes_log2FC)), na.rm = T)]),
            markerGene.log2fc = markerGenes_log2FC[markerGene],
            markerGene.log2fc = ifelse(is.infinite(markerGene.log2fc), 0, markerGene.log2fc),
-           numCelltypeUniqueMotif = motif_counts[peak,celltype])
-  tmp = apply(df2%>% dplyr::select(SeqMLScore:numCelltypeUniqueMotif, -c(anyOffTarget, peak2gene, markerGene)), 1, gm)
+           MotifZscore = motif_counts[peak,celltype])
+  tmp = apply(df2%>% dplyr::select(AvgScore:MotifZscore, -c(peak2gene, markerGene)), 1, gm)
   df2 = df2 %>% mutate(compositeScore = tmp) %>%
-    arrange(anyOffTarget, desc(compositeScore), is.na(peak2gene), peak2gene.cor, !is.na(markerGene.log2fc), 
-            markerGene.log2fc, is.na(numCelltypeUniqueMotif)) %>%
-    relocate(compositeScore, peak2gene:numCelltypeUniqueMotif, .before = SeqMLScore)
+    arrange(AvgRank, desc(compositeScore), is.na(peak2gene), peak2gene.cor, !is.na(markerGene.log2fc), 
+            markerGene.log2fc, is.na(MotifZscore)) %>%
+    relocate(compositeScore, peak2gene:MotifZscore, .before = AvgScore)
   return(df2)
 })
 
 candidate_enh_list2 = lapply(candidate_enh_list, function(df){ 
-  df = df %>% filter(!anyOffTarget) %>%
-    mutate(rank = seq(n()), 
-           label =ifelse(is.na(peak2gene),  paste(label, rank, sep = "_"), 
-                         paste(label, rank, peak2gene, sep = "_")))
+  df = df %>% mutate(label =ifelse(is.na(peak2gene),  paste(label, AvgRank, sep = "_"), 
+                         paste(label, AvgRank, peak2gene, sep = "_")))
   return(df)
   })
 save_top_enh_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.candidate_celltype_enhancers.rds')
