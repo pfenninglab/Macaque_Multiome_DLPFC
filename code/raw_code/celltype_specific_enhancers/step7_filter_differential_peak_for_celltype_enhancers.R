@@ -17,20 +17,26 @@ gm = function(...){ expm1(mean(log1p(...), na.rm = T))}
 save_models_fn = here(DATADIR, 'rdas/cell_type_models_to_train_DLPFC.rds')
 models_df = readRDS(save_models_fn)
 
-save_diffPeaks_fn = here(DATADIR, 'rdas/cell_type_models_diffPeakList_DLPFC.rds')
-diffPeakList = readRDS(save_diffPeaks_fn) %>% lapply(function(gr) {
-  gr[gr$Log2FC > 0 & gr$FDR < 1e-2 & gr$MeanDiff > .05 ]
-})
-candidateList = lapply(diffPeakList, names)
+save_diffPeaks_fn = here(DATADIR, 'rdas/cell_type_models.all_diffPeaks.DESeq2.rds')
+
+alpha = 0.05
+diffPeakList =  readRDS(save_diffPeaks_fn) %>%
+  lapply(rownames_to_column, "peakName") %>% rbindlist(idcol = 'model') %>%
+  filter(padj < alpha, log2FoldChange > 0) %>% 
+  full_join(models_df) %>% group_by(peakName) %>%
+  filter(length(unique(label)) <= 3) %>% ungroup() %>%
+  split(f = .$model )
+
+candidateList = lapply(diffPeakList, '[[', 'peakName')
 candidateList = split(candidateList[models_df$model], models_df$label)
 candidateList = lapply(candidateList, function(ll){
-  ll = ll[lengths(ll) > 1000]
-  data.frame(peak = Reduce('union', ll))
+  data.frame(peak = Reduce('intersect', ll))
 })
-sapply(candidateList, nrow)
 
 candidateEnhancers = rbindlist(candidateList, idcol = 'label') %>%
   group_by(peak) %>% filter(n()==1) %>% ungroup()
+table(candidateEnhancers$label)
+
 
 ################################################
 ## 2) read in the predictions for all the models
@@ -102,14 +108,22 @@ candidate_enh_pred_wide %>% sapply(nrow)
 ## 3) retrieve Peak2GeneLinks and MarkerGenes
 
 ## cell type-specific marker genes
-save_DEGs_fn = here(DATADIR, 'rdas/cell_type_models.top_DEGs.rds')
-de.markers.list2 = readRDS(save_DEGs_fn)
-de.markers = de.markers.list2 %>% rbindlist(idcol = 'celltype')
-markerGenes = sapply(de.markers.list2, '[[', 'Gene.Symbol') %>%unlist() %>%unique()
-markerGenes2 = setNames(mapply(rep, names(de.markers.list2), 
-                               sapply(de.markers.list2, nrow)) %>% unlist(), 
-                        markerGenes)
-markerGenes_log2FC = setNames(de.markers$avg_log2FC, de.markers$Gene.Symbol)
+save_DEGs_fn = here(DATADIR, 'rdas/cell_type_models.all_DEGs.DESeq2.rds')
+de.markers.list = readRDS(save_DEGs_fn)
+de.markers.list2 = de.markers.list %>% lapply(as.data.frame) %>%
+  lapply(rownames_to_column, "Gene.Symbol") %>% rbindlist(idcol = 'model') %>%
+  mutate(Gene.Symbol = as.character(Gene.Symbol)) %>%
+  filter(padj < alpha, log2FoldChange > 0) %>%
+  full_join(x = models_df) %>%
+  group_by(label, Gene.Symbol) %>% top_n(1, -log10(padj)) %>% ungroup() %>% 
+  group_by(Gene.Symbol) %>% filter(length(unique(label)) <=3) %>%  ungroup() %>%
+  dplyr::select(-c('model', 'bgd.group', 'bgd.labels')) %>%
+  arrange(Gene.Symbol) %>% split(f = .$label)
+
+de.markers = de.markers.list2 %>% rbindlist(idcol = 'celltype') 
+markerGenes = de.markers %>% dplyr::select(celltype, Gene.Symbol) %>% deframe()
+markerGenes2 = de.markers %>% dplyr::select(Gene.Symbol, celltype) %>% deframe()
+markerGenes_log2FC = setNames(de.markers$log2FoldChange, de.markers$Gene.Symbol)
 markerGenes_log2FC = sort(markerGenes_log2FC, decreasing= TRUE)
 
 ## load the ArchR project w/ the samples and get peak counts matrix
@@ -118,7 +132,7 @@ proj = loadArchRProject(path = file.path('data/tidy_data/ArchRProjects',
 
 p2g <- getPeak2GeneLinks(proj, corCutOff = 0.1, resolution = 1, returnLoops = FALSE)
 metadata(p2g)$peakSet$name = with(data.frame(metadata(p2g)$peakSet), 
-                             paste0('rheMac10:',seqnames, ':', start, '-', end, ':', 250))
+                                  paste0('rheMac10:',seqnames, ':', start, '-', end, ':', 250))
 p2g$gene =metadata(p2g)$geneSet$name[p2g$idxRNA]
 p2g$peak =metadata(p2g)$peakSet$name[p2g$idxATAC]
 
@@ -161,7 +175,8 @@ candidate_enh_list = lapply(candidate_enh_pred_wide, function(df){
 
 candidate_enh_list2 = lapply(candidate_enh_list, function(df){ 
   df = df %>% mutate(label =ifelse(is.na(peak2gene),  paste(label, AvgRank, sep = "_"), 
-                         paste(label, AvgRank, peak2gene, sep = "_")))
+                         paste(label, AvgRank, peak2gene, sep = "_"))) %>%
+    filter(MotifZscore > 0, !is.na(df$peak2gene))
   return(df)
   })
 save_top_enh_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.candidate_celltype_enhancers.rds')
