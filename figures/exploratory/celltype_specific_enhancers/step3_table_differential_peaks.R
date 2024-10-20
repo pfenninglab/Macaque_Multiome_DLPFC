@@ -4,6 +4,7 @@ library(SummarizedExperiment)
 library(here); library(tidyverse)
 library(Seurat)
 library(rtracklayer)
+library(data.table)
 library(ggtree)
 library(ggtreeExtra)
 library(tidytree)
@@ -13,60 +14,57 @@ ss <- function(x, pattern, slot = 1, ...) { sapply(strsplit(x = x, split = patte
 
 ########################################
 ## load genomeAnnotation, geneAnnotation
-addArchRThreads(threads = 8)
-GENOMEDIR='/home/bnphan/resources/genomes/rheMac10'
-# contains `geneAnnotation` and `genomeAnnotation` objects
-load(file.path(GENOMEDIR,'rheMac10_liftoff_GRCh38.p13_ArchR_annotations.rda'))
-
 PLOTDIR='figures/exploratory/cell_type_hierarchy/plots/'
+DATADIR = 'data/tidy_data/celltype_specific_enhancers'
+DATADIR2 = 'figures/exploratory/celltype_specific_enhancers/tables/'
 
-
-######################
-## get ArchR project
-PROJDIR2=here("data/tidy_data/ArchRProjects/ArchR_Multiome_DLPFC")
-proj = loadArchRProject(path = PROJDIR2)
-proj = proj[! proj$predictedGroup_RNA2RNACo %in% c('TH', 'L5.POU3F1')]
-table(proj$predictedGroup_RNA2RNACo)
-
-celltypes = getCellColData(proj) %>% as.data.frame() %>%
-  filter(!duplicated(predictedGroup_RNA2RNACo)) %>% 
-  mutate(cell_class = case_when(grepl('^L[2-6]', predictedGroup_RNA2RNACo) ~ 'EXC', 
-                                grepl('SST|LAMP|NDN|VIP|PVAL', predictedGroup_RNA2RNACo) ~ 'INH',
-                                TRUE ~ "GLIA")) %>%
-  dplyr::select(predictedGroup_RNA2RNACo, cell_class) %>% as.data.frame() %>% 
-  split(x = .$predictedGroup_RNA2RNACo,f = .$cell_class)
-unlist(celltypes[c('EXC', 'INH', 'GLIA')])
+save_models_fn = here(DATADIR, 'rdas/cell_type_models_to_train_DLPFC.rds')
+models_df = readRDS(save_models_fn)
 
 ###############################
 ## compute differential peaks
-diffPeak_fn = here('figures/exploratory/cell_type_hierarchy/rdas/differentialPeaks_1vAll.rds')
-if(FALSE){
-  markersPeaks <- getMarkerFeatures( proj,useMatrix = "PeakMatrix", 
-  groupBy = "predictedGroup_RNA2RNACo",  testMethod = "wilcoxon",
-  bias = c("TSSEnrichment", "log10(nFrags)"))
-  saveRDS(markersPeaks, diffPeak_fn)
-} else {
-  markersPeaks = readRDS(diffPeak_fn)
-}
+alpha = 0.05
+save_diffPeaks_fn = here(DATADIR, 'rdas/cell_type_models.all_diffPeaks.DESeq2.rds')
+diffPeakList =  readRDS(save_diffPeaks_fn) %>%
+  lapply(rownames_to_column, "peakName") %>% rbindlist(idcol = 'model') %>%
+  filter(padj < alpha, log2FoldChange > 0) %>% 
+  full_join(models_df) %>% group_by(peakName) %>%
+  filter(length(unique(label)) <= 3) %>% ungroup() %>%
+  split(f = .$model )
 
-markerList <- getMarkers(markersPeaks, cutOff = "FDR <= 0.01 & Log2FC >= 1")
+candidateList = lapply(diffPeakList, '[[', 'peakName')
+candidateList = split(candidateList[models_df$model], models_df$label)
+candidateList = lapply(candidateList, function(ll){
+  data.frame(peak = Reduce('union', ll))
+})
 
-markerDat = markerList %>% lapply(as.data.frame) %>%
-  rbindlist(idcol = 'celltype') %>% 
-  mutate(celltype = factor(celltype, unlist(celltypes[c('EXC', 'INH', 'GLIA')])))
-markerDat2 = markerDat %>% group_by(idx) %>% filter(length(idx) > 1) %>%
-  ungroup()
+candidateEnhancersList = rbindlist(candidateList, idcol = 'label') %>%
+  group_by(peak) %>% filter(n()==1) %>% ungroup() %>%
+  split(f = .$label)
 
-tab1 = full_join(
-  getCellColData(proj) %>% as.data.frame() %>%
-    mutate(celltype = factor(predictedGroup_RNA2RNACo, unlist(celltypes[c('EXC', 'INH', 'GLIA')]))) %>% count(celltype) %>% rename('numCells' = 'n'),
-  markerDat %>% count(celltype) %>% rename('differentialEnhancer' = 'n')) %>%
-  full_join(markerDat2 %>% count(celltype) %>% rename('uniqDiffEnhancer' = 'n'))
+tmp = sapply(candidateEnhancersList, nrow)
+mean(tmp)
+sd(tmp)/sqrt(length(candidateEnhancersList))
 
-markerDat %>% writexl::write_xlsx(here('figures/exploratory/cell_type_hierarchy/tables/differentialEnhancerTable_multiomeATAC_DLPFC.xlsx'))
+######################
+## get ArchR project
+PROJDIR2=here("data/tidy_data/ArchRProjects/ArchR_DLPFC_scATAC")
+proj = loadArchRProject(path = PROJDIR2)
+celltypesList = split(proj$Celltype2, proj$Celltype2)
+celltypesList = celltypesList[names(candidateEnhancersList)]
 
-markerDat2 %>% writexl::write_xlsx(here('figures/exploratory/cell_type_hierarchy/tables/uniqDiffEnhancerTable_multiomeATAC_DLPFC.xlsx'))
 
-tab1 %>% writexl::write_xlsx(here('figures/exploratory/cell_type_hierarchy/tables/candidateCelltypeEnhancerSummaryTable_multiomeATAC_DLPFC.xlsx'))
+## read in table of prioritized enhancers
+save_top_enh_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.candidate_celltype_enhancers.rds')
+candidate_enh_list = readRDS(save_top_enh_fn)
+numCandidatePeaks = sapply(candidate_enh_list, nrow)
+numCandidatePeaks = numCandidatePeaks[names(candidateEnhancersList)]
 
+df = data.frame(celltype = names(candidateEnhancersList),
+                numCells = lengths(celltypesList), 
+                numCandidateEnhancers = sapply(candidateEnhancersList, nrow),
+                numMLselectedEnhancers = numCandidatePeaks)
+
+save_table_fn = here(DATADIR2,'candidateCelltypeEnhancerSummaryTable_multiomeATAC_DLPFC_20220418.xlsx')
+writexl::write_xlsx(df, save_table_fn)
 
