@@ -18,17 +18,17 @@ Rplots.pdf
 *.mtx
 *.rda
 
-*/BAM/*
-*/SNAP/*
-*/FASTQ/*
-*/bam/*
-*/fastq/*
-*/snap/*
-*/outs/*
-*/logs/*
-*/ArchR*
-*/meme/*
-*/data/*
+BAM/
+SNAP/
+FASTQ/
+bam/
+fastq/
+snap/
+outs/
+logs/
+ArchR*
+meme/
+data/
 
 # log file extensions
 *.log
