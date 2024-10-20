@@ -147,7 +147,7 @@ p2g_cor = setNames(p2g$Correlation, p2g$peak)
 
 ########################################
 ## 4) retrieve cell type unique motifs
-save_motif_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.noncoding_peak.HOCOMOCO11_celltypeMotifs.se.rds')
+save_motif_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.noncoding_peak.HOCOMOCO11_celltypeMotifs.se')
 motif_unique_sums_se = readRDS(save_motif_fn)
 motif_unique_sums_se = motif_unique_sums_se[candidate_peaks, ]
 motif_counts = assays(motif_unique_sums_se)[[1]]
@@ -165,28 +165,26 @@ candidate_enh_list = lapply(candidate_enh_pred_wide, function(df){
            markerGene.log2fc = markerGenes_log2FC[markerGene],
            markerGene.log2fc = ifelse(is.infinite(markerGene.log2fc), 0, markerGene.log2fc),
            MotifZscore = motif_counts[peak,celltype])
-  tmp = apply(df2%>% dplyr::select(AvgScore:MotifZscore, -c(peak2gene, markerGene)), 1, gm)
+  tmp = apply(df2%>% dplyr::select(AvgScore:MotifZscore, -c(peak2gene, markerGene)) , 1, gm)
   df2 = df2 %>% mutate(compositeScore = tmp) %>%
-    arrange(AvgRank, desc(compositeScore), is.na(peak2gene), peak2gene.cor, !is.na(markerGene.log2fc), 
+    arrange(desc(compositeScore), AvgRank,  is.na(peak2gene), peak2gene.cor, !is.na(markerGene.log2fc), 
             markerGene.log2fc, is.na(MotifZscore)) %>%
-    relocate(compositeScore, peak2gene:MotifZscore, .before = AvgScore)
+    relocate(compositeScore, peak2gene:MotifZscore, .before = AvgScore) %>%
+    mutate(AvgRank = order(-compositeScore))
+  df2 = df2 %>% mutate(label =ifelse(is.na(peak2gene),  paste(label, AvgRank, sep = "_"), 
+                              paste(label, AvgRank, peak2gene, sep = "_"))) 
   return(df2)
 })
 
-candidate_enh_list2 = lapply(candidate_enh_list, function(df){ 
-  df = df %>% mutate(label =ifelse(is.na(peak2gene),  paste(label, AvgRank, sep = "_"), 
-                         paste(label, AvgRank, peak2gene, sep = "_"))) %>%
-    filter(MotifZscore > 0, !is.na(df$peak2gene))
-  return(df)
-  })
+
 save_top_enh_fn = here(DATADIR, 'rdas', 'rheMac10_DLPFC.candidate_celltype_enhancers.rds')
 saveRDS(candidate_enh_list, save_top_enh_fn)
 
 save_top_enh_excel = here(DATADIR, 'tables', 'rheMac10_DLPFC.candidate_celltype_enhancers.xlsx')
-writexl::write_xlsx(candidate_enh_list2, save_top_enh_excel)
+writexl::write_xlsx(candidate_enh_list, save_top_enh_excel)
 
-head(candidate_enh_list2[[1]] %>% data.frame())
-sapply(candidate_enh_list2, nrow)
+head(candidate_enh_list[[1]] %>% data.frame())
+sapply(candidate_enh_list, nrow)
 
 
 

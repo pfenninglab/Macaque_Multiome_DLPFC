@@ -106,7 +106,7 @@ eval_pivot_df = eval_df %>% dplyr::select(-c(model, model_path, model_name)) %>%
 pdf(here(PLOTDIR, 'plots', 'compare_CNNvsSVM_validation_evaluations.pdf'), width = 8, height = 4)
 ggplot(eval_pivot_df, aes(x = SVM, y= CNN)) + 
   geom_abline(intercept = 0, slope = 1, linetype = 'dashed', color = 'red')+
-  geom_point(pch = 21, aes(fill = label)) +
+  geom_point(pch = 21, aes(fill = label)) +w
   theme_bw() +
   facet_wrap(~metric, scales = 'free') +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))

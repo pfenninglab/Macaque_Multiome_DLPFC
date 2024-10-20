@@ -29,7 +29,7 @@ if (is.null(opt$SampleName)){
 
 ########################################
 ## load genomeAnnotation, geneAnnotation
-addArchRThreads(threads = round(parallel::detectCores()/2))w
+addArchRThreads(threads = round(parallel::detectCores()/2))
 GENOMEDIR='/home/bnphan/resources/genomes/rheMac10'
 # contains `geneAnnotation` and `genomeAnnotation` objects
 load(file.path(GENOMEDIR,'rheMac10_liftoff_GRCh38.p13_ArchR_annotations.rda'))

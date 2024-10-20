@@ -21,6 +21,7 @@ library(IHW)
 
 register(MulticoreParam(18))
 
+
 DATADIR='data/tidy_data/celltype_specific_enhancers'
 
 ## load in the sample sheet
@@ -31,14 +32,12 @@ pd = read_csv(here('data/raw_data/tables/SampleSheet_RNA_DLPFC.csv')) %>%
          Sample = paste0(Nickname, '_', Region, '-',Batch)) %>%
   relocate(Sample, Region, Animal, Batch, .before = everything())
 
-
 #######################################################
 # 0) Seurat uses the future package for parallelization
 ## set to be parallel over 8 cores
 plan("multicore", workers = 16)
 options(future.globals.maxSize = 100 * 1024^3)
 options(future.rng.onMisuse = 'ignore')
-
 
 ###############################################
 ## 1) load SeuratObjects of labeled all nuclei
@@ -81,7 +80,7 @@ de.markers.list = lapply(contrastsList, function(cont){
 })
 names(de.markers.list) = model_name
 save_DEGs_fn = here(DATADIR, 'rdas/cell_type_models.all_DEGs.DESeq2.rds')
-saveRDS(de.markers.list %>% lapply(as.data.frame), save_DEGs_fn)
+#saveRDS(de.markers.list %>% lapply(as.data.frame), save_DEGs_fn)
 
 ##############################################################
 ## 4) filter to significant DEGs, 
@@ -100,5 +99,6 @@ sapply(de.markers.list2, nrow)
 sapply(de.markers.list2, '[[', 'Gene.Symbol' )  %>% unlist() %>% head()
 
 save_DEGs_fn2 = here(DATADIR, 'rdas/cell_type_models.top_DEGs.DESeq2.rds')
-saveRDS(de.markers.list2, save_DEGs_fn2)
+print('done')
+#saveRDS(de.markers.list2, save_DEGs_fn2)
 

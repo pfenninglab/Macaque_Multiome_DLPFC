@@ -14454,6 +14454,11 @@ all of MD as it is not optimized for dense, information rich UIs.
 </style>
 
 <style type="text/css">
+/* Force rendering true colors when outputing to pdf */
+* {
+  -webkit-print-color-adjust: exact;
+}
+
 /* Misc */
 a.anchor-link {
   display: none;
@@ -14470,6 +14475,11 @@ a.anchor-link {
 
 .jp-InputArea-editor {
   overflow: hidden;
+}
+
+.CodeMirror pre {
+  margin: 0;
+  padding: 0;
 }
 
 /* Using table instead of flexbox so that we can use break-inside property */
@@ -14510,11 +14520,12 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
   width: 100%;
 }
 
-@media print {
-  .jp-Collapser {
-    display: none;
-  }
+/* Hiding the collapser by default */
+.jp-Collapser {
+  display: none;
+}
 
+@media print {
   .jp-Cell-inputWrapper,
   .jp-Cell-outputWrapper {
     display: block;
@@ -14548,12 +14559,12 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
                 },
                 displayAlign: 'center',
                 CommonHTML: {
-                    linebreaks: { 
-                    automatic: true 
+                    linebreaks: {
+                    automatic: true
                     }
                 }
             });
-        
+
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
@@ -14732,10 +14743,14 @@ Successfully loaded ArchRProject!
 </div>
 
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="Add-predictedRNA2ATAC-co-clustering-labels-from-sub-analyses">Add predictedRNA2ATAC co-clustering labels from sub-analyses<a class="anchor-link" href="#Add-predictedRNA2ATAC-co-clustering-labels-from-sub-analyses">&#182;</a></h1>
+</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -19909,6 +19924,8 @@ gCDhDQAAAEHCGwAAAIKENwAAAAQJbwAAAAgS3gAAABAkvAEAACBIeAMAAECQ8AYAAIAg4Q0A
 AABBwhsAAACChDcAAAAECW8AAAAIEt4AAAAQ9A/Z1rqHKbHejAAAAABJRU5ErkJggg=="
 width=660
 height=510
+class="
+"
 >
 </div>
 
@@ -19987,10 +20004,14 @@ Successfully loaded ArchRProject!
 </div>
 
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="Call-peaks-using-integrated-clusters">Call peaks using integrated clusters<a class="anchor-link" href="#Call-peaks-using-integrated-clusters">&#182;</a></h1>
+</div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -20326,11 +20347,11 @@ ArchR logging successful to : ArchRLogs/ArchR-addGroupCoverages-6efdf492f0fbb-Da
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="c1"># call peaks </span>
-<span class="n">proj</span><span class="o">&lt;-</span><span class="nf">addReproduciblePeakSet</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span> <span class="n">groupBy</span> <span class="o">=</span> <span class="s">&quot;predictedGroup_RNA2ATACCo&quot;</span><span class="p">,</span> 
+<span class="n">proj</span><span class="o">&lt;-</span><span class="nf">addReproduciblePeakSet</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span> <span class="n">groupBy</span> <span class="o">=</span> <span class="s">&quot;Celltype2&quot;</span><span class="p">,</span> 
                              <span class="n">plot</span> <span class="o">=</span> <span class="kc">FALSE</span><span class="p">,</span> <span class="n">genomeSize</span> <span class="o">=</span> <span class="m">2.7e9</span><span class="p">)</span>
 </pre></div>
 
@@ -20357,10 +20378,12 @@ ArchR logging successful to : ArchRLogs/ArchR-addGroupCoverages-6efdf492f0fbb-Da
 
 Found with $path!
 
-ArchR logging to : ArchRLogs/ArchR-addReproduciblePeakSet-6efdf47b814fe-Date-2022-01-07_Time-21-43-04.log
+ArchR logging to : ArchRLogs/ArchR-addReproduciblePeakSet-6efdf4ca140f3-Date-2022-01-07_Time-22-51-49.log
 If there is an issue, please report to github with logFile!
 
 Calling Peaks with Macs2
+
+2022-01-07 22:51:49 : Peak Calling Parameters!, 0.006 mins elapsed.
 
 </pre>
 </div>
@@ -20372,16 +20395,55 @@ Calling Peaks with Macs2
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>                      Group nCells nCellsUsed nReplicates nMin nMax maxPeaks
+Astro                 Astro   7326       5000           5 1000 1000   150000
+Endo                   Endo    270        232           4   44   75   116000
+L2.CUX2.MEIS2 L2.CUX2.MEIS2   8047       5000           5 1000 1000   150000
+L3.CUX2.RORB   L3.CUX2.RORB   1620       1620           5  283  365   150000
+L4.ALPL             L4.ALPL   2907       2907           5  415  709   150000
+L4.TYR               L4.TYR   1039       1039           5  171  243   150000
+L4.5.TBX15       L4.5.TBX15   1967       1967           5  333  440   150000
+L5.PCP4             L5.PCP4    486        486           5   64  123   150000
+L5.POU3F1         L5.POU3F1    170        170           3   56   57    85000
+L5.6.NR4A2       L5.6.NR4A2    316        316           5   50   84   150000
+L6.ITGA8           L6.ITGA8   1137       1137           5  167  263   150000
+L6.NKD1             L6.NKD1    445        445           5   77  100   150000
+L6.SYT6             L6.SYT6    541        541           5   84  128   150000
+LAMP5                 LAMP5    635        635           5  110  147   150000
+Microglia         Microglia   3601       3601           5  584  866   150000
+Mural                 Mural   1010       1010           5   50  370   150000
+NDNF                   NDNF    792        792           5  125  210   150000
+Oligo                 Oligo   3024       2997           5  220 1000   150000
+OPC                     OPC   2434       2434           5  369  687   150000
+PV.BC                 PV.BC   1678       1678           5  286  406   150000
+PV.ChC               PV.ChC    394        394           5   73   87   150000
+SST                     SST   2366       2366           5  389  609   150000
+VIP                     VIP   1443       1443           5  258  323   150000
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>
-Error in .getCoverageMetadata(ArchRProj = ArchRProj, groupBy = groupBy, : No Coverage Metadata found for : predictedGroup_RNA2ATACCo. Please run addGroupCoverages!
-Traceback:
+<pre>2022-01-07 22:51:49 : Batching Peak Calls!, 0.006 mins elapsed.
 
-1. addReproduciblePeakSet(proj, groupBy = &#34;predictedGroup_RNA2ATACCo&#34;, 
- .     plot = FALSE, genomeSize = 2.7e+09)
-2. .getCoverageMetadata(ArchRProj = ArchRProj, groupBy = groupBy, 
- .     minCells = minCells)
-3. stop(&#34;No Coverage Metadata found for : &#34;, groupBy, &#34;. Please run addGroupCoverages!&#34;)</pre>
+2022-01-07 22:51:49 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+2022-01-08 03:07:53 : Identifying Reproducible Peaks!, 256.078 mins elapsed.
+
+2022-01-08 03:15:03 : Creating Union Peak Set!, 263.241 mins elapsed.
+
+Converged after 26 iterations!
+
+2022-01-08 03:15:29 : Finished Creating Union Peak Set (660066)!, 263.67 mins elapsed.
+
+</pre>
 </div>
 </div>
 
@@ -20389,12 +20451,12 @@ Traceback:
 
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="c1"># add peak counts matrix </span>
@@ -20406,12 +20468,41 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>ArchR logging to : ArchRLogs/ArchR-addPeakMatrix-6efdf5de5fe2-Date-2022-01-08_Time-03-15-29.log
+If there is an issue, please report to github with logFile!
+
+2022-01-08 03:15:29 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+ArchR logging successful to : ArchRLogs/ArchR-addPeakMatrix-6efdf5de5fe2-Date-2022-01-08_Time-03-15-29.log
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="nf">saveArchRProject</span><span class="p">(</span><span class="n">ArchRProj</span> <span class="o">=</span> <span class="n">proj</span><span class="p">)</span>
@@ -20422,12 +20513,64 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>Saving ArchRProject...
+
+Loading ArchRProject...
+
+Successfully loaded ArchRProject!
+
+
+                                                   / |
+                                                 /    \
+            .                                  /      |.
+            \\\                              /        |.
+              \\\                          /           `|.
+                \\\                      /              |.
+                  \                    /                |\
+                  \\#####\           /                  ||
+                ==###########&gt;      /                   ||
+                 \\##==......\    /                     ||
+            ______ =       =|__ /__                     ||      \\\
+        ,--&#39; ,----`-,__ ___/&#39;  --,-`-===================##========&gt;
+       \               &#39;        ##_______ _____ ,--,__,=##,__   ///
+        ,    __==    ___,-,__,--&#39;#&#39;  ===&#39;      `-&#39;    | ##,-/
+        -,____,---&#39;       \\####\\________________,--\\_##,/
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----&#39;|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="c1"># add motif enrichment matrix</span>
@@ -20439,12 +20582,47 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>ArchR logging to : ArchRLogs/ArchR-addMotifAnnotations-6efdf1677e8a2-Date-2022-01-08_Time-10-18-18.log
+If there is an issue, please report to github with logFile!
+
+2022-01-08 10:18:19 : Gettting Motif Set, Species : , 0.003 mins elapsed.
+
+2022-01-08 10:18:47 : Finding Motif Positions with motifmatchr!, 0.47 mins elapsed.
+
+2022-01-08 10:42:56 : Creating Motif Overlap Matrix, 24.629 mins elapsed.
+
+2022-01-08 10:43:14 : Finished Getting Motif Info!, 24.927 mins elapsed.
+
+ArchR logging successful to : ArchRLogs/ArchR-addMotifAnnotations-6efdf1677e8a2-Date-2022-01-08_Time-10-18-18.log
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="c1"># # add motif deviations matrix</span>
@@ -20457,12 +20635,72 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>Identifying Background Peaks!
+
+Using Previous Background Peaks!
+
+ArchR logging to : ArchRLogs/ArchR-addDeviationsMatrix-6efdf2aad8edd-Date-2022-01-08_Time-10-44-14.log
+If there is an issue, please report to github with logFile!
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>NULL
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>2022-01-08 10:44:25 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+###########
+2022-01-09 02:42:35 : Completed Computing Deviations!, 958.352 mins elapsed.
+###########
+
+ArchR logging successful to : ArchRLogs/ArchR-addDeviationsMatrix-6efdf2aad8edd-Date-2022-01-08_Time-10-44-14.log
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="c1"># add co-accessibility matrix</span>
@@ -20477,12 +20715,87 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>ArchR logging to : ArchRLogs/ArchR-addCoAccessibility-6efdf500f1151-Date-2022-01-09_Time-02-42-38.log
+If there is an issue, please report to github with logFile!
+
+2022-01-09 02:42:38 : Computing KNN, 0.007 mins elapsed.
+
+2022-01-09 02:42:42 : Identifying Non-Overlapping KNN pairs, 0.066 mins elapsed.
+
+2022-01-09 02:42:45 : Identified 494 Groupings!, 0.119 mins elapsed.
+
+2022-01-09 02:43:01 : Computing Co-Accessibility chr1 (1 of 21), 0.396 mins elapsed.
+
+2022-01-09 02:43:51 : Computing Co-Accessibility chr2 (2 of 21), 1.227 mins elapsed.
+
+2022-01-09 02:44:26 : Computing Co-Accessibility chr3 (3 of 21), 1.811 mins elapsed.
+
+2022-01-09 02:45:01 : Computing Co-Accessibility chr4 (4 of 21), 2.385 mins elapsed.
+
+2022-01-09 02:45:29 : Computing Co-Accessibility chr5 (5 of 21), 2.855 mins elapsed.
+
+2022-01-09 02:45:52 : Computing Co-Accessibility chr6 (6 of 21), 3.233 mins elapsed.
+
+2022-01-09 02:46:21 : Computing Co-Accessibility chr7 (7 of 21), 3.719 mins elapsed.
+
+2022-01-09 02:46:56 : Computing Co-Accessibility chr8 (8 of 21), 4.299 mins elapsed.
+
+2022-01-09 02:47:20 : Computing Co-Accessibility chr9 (9 of 21), 4.714 mins elapsed.
+
+2022-01-09 02:47:47 : Computing Co-Accessibility chr10 (10 of 21), 5.158 mins elapsed.
+
+2022-01-09 02:48:14 : Computing Co-Accessibility chr11 (11 of 21), 5.61 mins elapsed.
+
+2022-01-09 02:48:42 : Computing Co-Accessibility chr12 (12 of 21), 6.069 mins elapsed.
+
+2022-01-09 02:49:05 : Computing Co-Accessibility chr13 (13 of 21), 6.46 mins elapsed.
+
+2022-01-09 02:49:27 : Computing Co-Accessibility chr14 (14 of 21), 6.824 mins elapsed.
+
+2022-01-09 02:49:58 : Computing Co-Accessibility chr15 (15 of 21), 7.334 mins elapsed.
+
+2022-01-09 02:50:21 : Computing Co-Accessibility chr16 (16 of 21), 7.721 mins elapsed.
+
+2022-01-09 02:50:47 : Computing Co-Accessibility chr17 (17 of 21), 8.163 mins elapsed.
+
+2022-01-09 02:51:04 : Computing Co-Accessibility chr18 (18 of 21), 8.438 mins elapsed.
+
+2022-01-09 02:51:18 : Computing Co-Accessibility chr19 (19 of 21), 8.679 mins elapsed.
+
+2022-01-09 02:51:39 : Computing Co-Accessibility chr20 (20 of 21), 9.03 mins elapsed.
+
+2022-01-09 02:52:02 : Computing Co-Accessibility chrX (21 of 21), 9.409 mins elapsed.
+
+ArchR logging successful to : ArchRLogs/ArchR-addCoAccessibility-6efdf500f1151-Date-2022-01-09_Time-02-42-38.log
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-r"><pre><span></span><span class="n">proj</span> <span class="o">=</span> <span class="nf">saveArchRProject</span><span class="p">(</span><span class="n">ArchRProj</span> <span class="o">=</span> <span class="n">proj</span><span class="p">)</span>
@@ -20493,36 +20806,56 @@ Traceback:
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-r"><pre><span></span>
-</pre></div>
-
-     </div>
-</div>
-</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-r"><pre><span></span>
-</pre></div>
 
-     </div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>Saving ArchRProject...
+
+Loading ArchRProject...
+
+Successfully loaded ArchRProject!
+
+
+                                                   / |
+                                                 /    \
+            .                                  /      |.
+            \\\                              /        |.
+              \\\                          /           `|.
+                \\\                      /              |.
+                  \                    /                |\
+                  \\#####\           /                  ||
+                ==###########&gt;      /                   ||
+                 \\##==......\    /                     ||
+            ______ =       =|__ /__                     ||      \\\
+        ,--&#39; ,----`-,__ ___/&#39;  --,-`-===================##========&gt;
+       \               &#39;        ##_______ _____ ,--,__,=##,__   ///
+        ,    __==    ___,-,__,--&#39;#&#39;  ===&#39;      `-&#39;    | ##,-/
+        -,____,---&#39;       \\####\\________________,--\\_##,/
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----&#39;|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+
+</pre>
 </div>
 </div>
+
+</div>
+
 </div>
 
 </div>

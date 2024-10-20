@@ -15,7 +15,6 @@ DATADIR=$PROJDIR/data/tidy_data/celltype_specific_enhancers
 DBFILE=/home/bnphan/resources/motif_databases/HUMAN/HOCOMOCOv11_full_HUMAN_mono_meme_format.meme
 GENOME=/home/bnphan/resources/genomes/rheMac10/rheMac10.fa
 cd $CODEDIR
-## for Andrew
 
 
 ##################################

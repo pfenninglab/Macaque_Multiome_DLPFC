@@ -85,27 +85,28 @@ sapply(outRanges, function(gr){
 
 
 
+# take care of w/ Carson's 
 
-#####################################
-# halLiftOver and HALPER the peaks ##
-halmapper_script = '/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/code/raw_code/hal_scripts/halper_map_peak_orthologs.sh'
-system('mkdir -p logs')
-sbatch = 'sbatch -p pfen1 -w compute-1-40 --mem 10G'
-SOURCE_SPECIES = 'Macaca_mulatta'
-TARGET_SPECIES = c('Homo_sapiens')
-target_species = paste('-t', TARGET_SPECIES)
-source_species = paste('-s', SOURCE_SPECIES)
-outdir = paste('-o', here('data/raw_data', 'halper'))
-peak_files = paste('-b',narrowPeak_fn)
-
-# paste the parameter calls together
-thecall = paste(sbatch, halmapper_script, 
-                source_species, 
-                rep(target_species, each= length(peak_files)), 
-                outdir, 
-                rep(peak_files, times = length(target_species)))
-cat(thecall, file= here(CODEDIR, 'step5b_run_halmaper_Peanut.sh'), sep = '\n')
-system(paste('chmod u+x', here(CODEDIR,'step5b_run_halmaper_Peanut.sh')))
-# system('./step5b_run_halmaper_Peanut.sh')
-
+# #####################################
+# # halLiftOver and HALPER the peaks ##
+# halmapper_script = '/projects/pfenninggroup/machineLearningForComputationalBiology/snATAC_cross_species_caudate/code/raw_code/hal_scripts/halper_map_peak_orthologs.sh'
+# system('mkdir -p logs')
+# sbatch = 'sbatch -p pfen1 -w compute-1-40 --mem 10G'
+# SOURCE_SPECIES = 'Macaca_mulatta'
+# TARGET_SPECIES = c('Homo_sapiens')
+# target_species = paste('-t', TARGET_SPECIES)
+# source_species = paste('-s', SOURCE_SPECIES)
+# outdir = paste('-o', here('data/raw_data', 'halper'))
+# peak_files = paste('-b',narrowPeak_fn)
+# 
+# # paste the parameter calls together
+# thecall = paste(sbatch, halmapper_script, 
+#                 source_species, 
+#                 rep(target_species, each= length(peak_files)), 
+#                 outdir, 
+#                 rep(peak_files, times = length(target_species)))
+# cat(thecall, file= here(CODEDIR, 'step5b_run_halmaper_Peanut.sh'), sep = '\n')
+# system(paste('chmod u+x', here(CODEDIR,'step5b_run_halmaper_Peanut.sh')))
+# # system('./step5b_run_halmaper_Peanut.sh')
+# 
 

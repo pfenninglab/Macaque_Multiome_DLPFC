@@ -11,8 +11,8 @@ library(BSgenome.Mmulatta.UCSC.rheMac10)
 
 DATADIR='data/tidy_data/celltype_specific_enhancers'
 
-source(here('code/final_code/hal_scripts/narrowPeakFunctions.R'))
-source(here('code/final_code/hal_scripts/gen_enh_ortholog_sets.R'))
+source(here::here('code/final_code/hal_scripts/narrowPeakFunctions.R'))
+source(here::here('code/final_code/hal_scripts/gen_enh_ortholog_sets.R'))
 
 ## chromosomal splits
 GENOME = 'rheMac10'
@@ -21,22 +21,22 @@ folds = list(fold1 = c('chr8', 'chr9'))
 
 #############################################################################
 ## export the fasta sequence of all noncoding/nonpromoter enhancer candidates
-peak_enh_fn = here(DATADIR, 'fasta', paste(GENOME,'DLPFC.noncoding_peak.fa', sep = '_'))
+peak_enh_fn = here::here(DATADIR, 'fasta', paste(GENOME,'DLPFC.noncoding_peak.fa', sep = '_'))
 if(!file.exists(peak_enh_fn)){
-  PROJDIR=here("data/tidy_data/ArchRProjects/ArchR_DLPFC_scATAC")
+  PROJDIR=here::here("data/tidy_data/ArchRProjects/ArchR_DLPFC_scATAC")
   proj = loadArchRProject(path = PROJDIR)
   peak_gr = getPeakSet(proj)
   indKeep = which(peak_gr$peakType %in% c('Distal', 'Intronic') & abs(peak_gr$distToTSS) > 2000)
   peak_gr = peak_gr[indKeep]
   peak_gr = peak_gr %>% addSummitCenter() %>% nameNarrowPeakRanges(genome = GENOME)
   writeGRangesToFasta (gr = peak_gr, file = peak_enh_fn, genome = GENOME)
-  save_fn = here(DATADIR, 'rdas', paste(GENOME,'DLPFC.noncoding_peak.gr.rds', sep = '_'))
+  save_fn = here::here(DATADIR, 'rdas', paste(GENOME,'DLPFC.noncoding_peak.gr.rds', sep = '_'))
   saveRDS(peak_gr, file = save_fn )
 }
 
 ############################################
 ### get the  cell type differential peaks
-save_diffPeaks_fn = here(DATADIR, 'rdas/cell_type_models_diffPeakList_DLPFC.rds')
+save_diffPeaks_fn = here::here(DATADIR, 'rdas/cell_type_models_diffPeakList_DLPFC.rds')
 rhesus_peakList = readRDS(save_diffPeaks_fn)
 
 # label the summit and peak name using rheMac10 coordinates
@@ -66,29 +66,29 @@ rhesus_negList_split = lapply(folds, function(fold){
 
 # write the peaks to fasta for each differential peak set
 split = names(rhesus_posList_split[[1]][[1]])
-system(paste('mkdir -p',  here(DATADIR, 'fasta')))
+system(paste('mkdir -p',  here::here(DATADIR, 'fasta')))
 for(cell in names(rhesus_peakList)){
   for(fold in names(folds)){
     # write the positives
-    pos.fasta_fn = here(DATADIR, 'fasta', 
+    pos.fasta_fn = here::here(DATADIR, 'fasta', 
                              paste(GENOME, cell, fold, split, 'positive.fa', sep = '_'))
     posFasta = mapply(writeGRangesToFasta, gr = rhesus_posList_split[[fold]][[cell]],  
                       file = pos.fasta_fn, genome = GENOME)
     
     # write the negatives
-    neg.fasta_fn = here(DATADIR, 'fasta', 
+    neg.fasta_fn = here::here(DATADIR, 'fasta', 
                         paste(GENOME, cell, fold, split, 'negative.fa', sep = '_'))
     negFasta = mapply(writeGRangesToFasta, gr = rhesus_negList_split[[fold]][[cell]],  
                       file = neg.fasta_fn, genome = GENOME)
 }}
 
 # save all the relevant objects for later
-system(paste('mkdir -p',  here(DATADIR, 'rdas')))
-save_fn = here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'.rds', sep = '.'))
+system(paste('mkdir -p',  here::here(DATADIR, 'rdas')))
+save_fn = here::here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'.rds', sep = '.'))
 saveRDS(rhesus_peakList, file = save_fn )
 
-save_fn2 = here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'_negativeSplits.rds', sep = '.'))
+save_fn2 = here::here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'_negativeSplits.rds', sep = '.'))
 saveRDS(rhesus_negList_split, file = save_fn2 )
 
-save_fn3 = here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'_positiveSplits.rds', sep = '.'))
+save_fn3 = here::here(DATADIR, 'rdas', paste('Macaque_DLPFC', GENOME,'_positiveSplits.rds', sep = '.'))
 saveRDS(rhesus_posList_split, file = save_fn3 )
